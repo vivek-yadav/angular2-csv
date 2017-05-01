@@ -6,6 +6,7 @@ export interface Options {
 	showLabels: boolean;
 	showTitle: boolean;
 	title: string;
+    headers: Array<string>;
 }
 
 export class CsvConfigConsts {
@@ -30,7 +31,8 @@ export const ConfigDefaults: Options = {
 	decimalseparator:		CsvConfigConsts.DEFAULT_DECIMAL_SEPARATOR,
 	showLabels: 				CsvConfigConsts.DEFAULT_SHOW_LABELS,
 	showTitle:					CsvConfigConsts.DEFAULT_SHOW_TITLE,
-	title: 							CsvConfigConsts.DEFAULT_TITLE
+	title: 							CsvConfigConsts.DEFAULT_TITLE,
+    headers: null
 };
 export class Angular2Csv {
 
@@ -96,9 +98,17 @@ export class Angular2Csv {
 	getHeaders(): void {
 		if(this._options.showLabels) {
 			let row = "";
+            if (this._options.headers != null) {
+				for (var i=0;i<this._options.headers.length;i++) {
+					row += this._options.headers[i] + this._options.fieldSeparator;
+				}
+			} else {
+				this._options.headers = [];
 			for (var index in this.data[0]) {
 				row += index + this._options.fieldSeparator;
+                this._options.headers.push(index);
 			}
+            }
 
 			row = row.slice(0, -1);
       this.csv += row + CsvConfigConsts.EOL;
@@ -110,9 +120,13 @@ export class Angular2Csv {
   getBody() {
   	for (var i = 0; i < this.data.length; i++) {
   		let row = "";
-  		for (var index in this.data[i]) {
-  			row += this.formartData(this.data[i][index]) + this._options.fieldSeparator;;
-  		}
+  		for (var c=0;c<this._options.headers.length;c++) {
+            if (this.data[i][this._options.headers[c]]==null && this.data[i][this._options.headers[c]]==undefined){
+                row +=  this._options.fieldSeparator;
+            }else{
+                row += this.formartData(this.data[i][this._options.headers[c]]) + this._options.fieldSeparator;
+            }
+        }
 
 			row = row.slice(0, -1);
   		this.csv += row + CsvConfigConsts.EOL;
